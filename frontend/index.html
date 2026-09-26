@@ -1,0 +1,74 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    />
+
+    <title>AI Recruiter Voice Assistant</title>
+</head>
+
+<body>
+
+    <main class="container">
+
+        <h1>
+            NeuroOceans AI Recruiter
+        </h1>
+
+        <p>
+            Start your voice screening interview below.
+        </p>
+
+
+        <label for="candidate-id">
+            Candidate ID
+        </label>
+
+        <input
+            id="candidate-id"
+            type="number"
+            min="1"
+            placeholder="Enter candidate ID"
+        />
+
+
+        <div class="buttons">
+
+            <button id="start-button">
+                Start Voice Interview
+            </button>
+
+            <button
+                id="end-button"
+                disabled
+            >
+                End Interview
+            </button>
+
+        </div>
+
+
+        <p>
+            Status:
+            <strong id="status">
+                Ready
+            </strong>
+        </p>
+
+    </main>
+
+
+    <script
+        type="module"
+        src="/src/main.js"
+    ></script>
+
+</body>
+
+</html>
