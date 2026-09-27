@@ -104,9 +104,16 @@ async function startInterview() {
         setStatus("Connecting to recruiter...");
 
 
+        const assistantOverrides = {
+            variableValues: {
+                candidate_id: String(session.candidate_id),
+                call_id: String(session.local_call_id),
+            },
+        };
+
         const call = await vapi.start(
             undefined,
-            undefined,
+            assistantOverrides,
             session.squad_id
         );
 
