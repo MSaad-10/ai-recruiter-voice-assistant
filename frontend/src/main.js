@@ -1,10 +1,13 @@
-import Vapi from "@vapi-ai/web";
+import * as VapiModule from "@vapi-ai/web";
 import "./style.css";
 
+const Vapi =
+    VapiModule.default?.default ??
+    VapiModule.default ??
+    VapiModule;
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const VAPI_PUBLIC_KEY = import.meta.env.VITE_VAPI_PUBLIC_KEY;
-
 
 const vapi = new Vapi(VAPI_PUBLIC_KEY);
 
@@ -92,24 +95,26 @@ async function startInterview() {
 
         startButton.disabled = true;
 
-        setStatus("Preparing interview...");
+        setStatus("Checking microphone...");
 
+        await verifyMicrophoneAccess();
+
+        setStatus("Preparing interview...")
 
         const session = await createLocalVoiceSession(candidateId);
 
 
         currentLocalCallId = session.local_call_id;
 
-
-        setStatus("Connecting to recruiter...");
-
-
         const assistantOverrides = {
             variableValues: {
                 candidate_id: String(session.candidate_id),
                 call_id: String(session.local_call_id),
+                candidate_name: session.candidate_name,
             },
         };
+
+        setStatus("Connecting to recruiter...");
 
         const call = await vapi.start(
             undefined,
@@ -134,6 +139,40 @@ async function startInterview() {
         setStatus(`Error: ${error.message}`);
 
         startButton.disabled = false;
+    }
+}
+
+
+async function verifyMicrophoneAccess() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+        });
+
+        const audioTracks = stream.getAudioTracks();
+
+        console.log("Microphone tracks:", audioTracks);
+
+        if (audioTracks.length === 0) {
+            throw new Error("No microphone audio track found.");
+        }
+
+        const track = audioTracks[0];
+
+        console.log("Microphone label:", track.label);
+        console.log("Microphone enabled:", track.enabled);
+        console.log("Microphone muted:", track.muted);
+        console.log("Microphone ready state:", track.readyState);
+
+        stream.getTracks().forEach((track) => track.stop());
+
+        return true;
+
+    } catch (error) {
+        console.error("Microphone test failed:", error);
+        throw new Error(
+            "Microphone access failed. Check browser and Windows permissions."
+        );
     }
 }
 
