@@ -28,6 +28,7 @@ async def start_voice_session(data: StartVoiceSessionRequest, db: Session = Depe
     return VoiceSessionResponse(
         local_call_id=call.id,
         candidate_id=call.candidate_id,
+        candidate_name=f"{candidate.first_name} {candidate.last_name}",
         vapi_call_id=call.vapi_call_id,
         call_type=call.call_type,
         status=call.status,
@@ -50,9 +51,12 @@ def link_vapi_call(call_id: int, data: LinkVapiCallRequest, db: Session = Depend
     
     updated_call = CallService.link_vapi_call(db=db, call=call, vapi_call_id=data.vapi_call_id)
 
+    candidate = CandidateService.get_candidate(db=db, candidate_id=updated_call.candidate_id)
+
     return VoiceSessionResponse(
         local_call_id=updated_call.id,
         candidate_id=updated_call.candidate_id,
+        candidate_name=(f"{candidate.first_name} {candidate.last_name}"),
         vapi_call_id=updated_call.vapi_call_id,
         squad_id=settings.vapi_squad_id,
         call_type=updated_call.call_type,

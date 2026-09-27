@@ -13,6 +13,7 @@ class LinkVapiCallRequest(BaseModel):
 class VoiceSessionResponse(BaseModel):
     local_call_id: int
     candidate_id: int
+    candidate_name: str
     vapi_call_id: str | None = None
     squad_id: str
 

@@ -1,3 +1,4 @@
+from os import stat
 from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 
@@ -41,3 +42,12 @@ class CallService:
         db.refresh(call)
 
         return call
+    
+
+    @staticmethod
+    def get_call_by_vapi_id(db: Session, vapi_call_id: str) -> Call | None:
+        return (
+            db.query(Call).filter(
+                Call.vapi_call_id == vapi_call_id
+            ).first()
+        )
