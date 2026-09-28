@@ -32,6 +32,21 @@ def save_screening_answer(data: SaveScreeningAnswerRequest, db: Session = Depend
     if not call:
         raise HTTPException(status_code = 404, detail = "Voice session not found")
     
+    expected_question = ScreeningService.get_next_question(db=db, call_id=data.call_id,)
+
+    if expected_question is None:
+        raise HTTPException(status_code=409, detail="Screening is already complete.",)
+
+    if data.question_key != expected_question:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "message": "Answer received out of sequence.",
+                "expected_question": expected_question,
+                "received_question": data.question_key,
+            },
+        )
+    
     ScreeningService.save_answer(
         db=db,
         candidate_id=data.candidate_id,
@@ -40,11 +55,22 @@ def save_screening_answer(data: SaveScreeningAnswerRequest, db: Session = Depend
         answer=data.answer
     )
 
-    return SaveScreeningAnswerResponse(saved=True, message="Screening answer saved successfully.")
+    next_question = ScreeningService.get_next_question(db=db, call_id=data.call_id)
+
+    return SaveScreeningAnswerResponse(
+        saved=True, 
+        message="Screening answer saved successfully.",
+        screening_complete=next_question is None,
+        next_question_key=next_question,
+    )
 
 
 @router.post("/check-eligibility", response_model=EligibilityResponse)
 def check_eligibility(data: EligibilityRequest, db: Session = Depends(get_db)):
+
+    print("Eligibility candidate_id:", data.candidate_id)
+    print("Eligibility call_id:", data.call_id)
+
     candidate = CandidateService.get_candidate(db=db, candidate_id=data.candidate_id)
 
     if not candidate:
@@ -56,6 +82,23 @@ def check_eligibility(data: EligibilityRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Voice session not found")
     
     answers = ScreeningService.get_answers(db=db, call_id=data.call_id)
+
+    missing_questions = (EligibilityEngine.REQUIRED_QUESTIONS - set(answers.keys()))
+
+    if missing_questions:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "message": "Screening is not complete yet.",
+                "missing_questions": sorted(missing_questions),
+            },
+        )
+
+    print("\n========== ELIGIBILITY DEBUG ==========")
+    print("candidate_id:", data.candidate_id)
+    print("call_id:", data.call_id)
+    print("answers:", answers)
+    print("=======================================\n")
 
     result = EligibilityEngine.evaluate(candidate=candidate, answers=answers)
 

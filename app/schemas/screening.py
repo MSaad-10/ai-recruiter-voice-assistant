@@ -11,6 +11,8 @@ class SaveScreeningAnswerRequest(BaseModel):
 class SaveScreeningAnswerResponse(BaseModel):
     saved: bool
     message: str
+    screening_complete: bool
+    next_question_key: str | None = None
 
 
 class EligibilityRequest(BaseModel):

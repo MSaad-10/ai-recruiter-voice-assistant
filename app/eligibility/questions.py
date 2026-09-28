@@ -44,3 +44,18 @@ SCREENING_QUESTIONS = [
         "question": "Would you like to proceed to the interview stage if you qualify?",
     },
 ]
+
+
+SCREENING_QUESTION_ORDER = [
+    "experience_years",
+    "work_authorized",
+    "start_within_30_days",
+    "full_time",
+    "job_abandonment",
+    "education",
+    "salary_acceptance",
+    "language_fluent",
+    "location_suitable",
+    "working_hours",
+    "interview_consent",
+]

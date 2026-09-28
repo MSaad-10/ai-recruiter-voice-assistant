@@ -39,17 +39,7 @@ class EligibilityEngine:
                 "rule": "age",
                 "reason": "Candidate must be between 21 and 55 years old."
             })
-        
-        missing_questions = (
-            EligibilityEngine.REQUIRED_QUESTIONS - answers.keys()
-        )
 
-        if missing_questions:
-            failed_rules.append({
-                "rule": "required_questions",
-                "reason": ("Not all required screening questions were answered.")
-            })
-        
         try:
             experience = float(answers.get("experience_years", "0"))
         except ValueError:
