@@ -1,5 +1,6 @@
-from app.models.candidate import Candidate
 from datetime import date
+
+from app.models.candidate import Candidate
 
 
 class EligibilityEngine:

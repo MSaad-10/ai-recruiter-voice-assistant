@@ -1,5 +1,3 @@
-from sqlalchemy.orm.interfaces import MapperOption
-from pydantic_core.core_schema import nullable_schema
 from datetime import datetime, date
 from sqlalchemy import Date, DateTime, String
 from sqlalchemy.orm import Mapped, mapped_column
