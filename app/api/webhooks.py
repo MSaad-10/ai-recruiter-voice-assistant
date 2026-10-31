@@ -33,21 +33,32 @@ def vapi_webhook(payload: VapiWebhookRequest, db: Session = Depends(get_db)):
 def handle_status_update(message: dict, db: Session):
     call_data = message.get("call", {})
     vapi_call_id = call_data.get("id")
+    status = message.get("status")
 
     if not vapi_call_id:
-        return {"received": True}
+        return {
+            "received": True,
+            "updated": False,
+            "reason": "Missing Vapi call ID",
+        }
     
     call = CallService.get_call_by_vapi_id(db=db, vapi_call_id=vapi_call_id)
 
     if not call:
-        return {"received": True}
+        return {
+            "received": True,
+            "updated": False,
+            "reason": "Call not found",
+        }
     
-    if status == "ended":
+    if status == "ended" and call.ended_at is None:
         call.ended_at = datetime.utcnow()
         db.commit()
+        db.refresh(call)
     
     return {
         "received": True,
+        "updated": True,
         "status": status,
     }
 

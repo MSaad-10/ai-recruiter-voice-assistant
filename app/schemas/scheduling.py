@@ -27,5 +27,5 @@ class BookInterviewRequest(BaseModel):
 class BookInterviewResponse(BaseModel):
     booked: bool
     message: str
-    interview_id: int
+    interview_id: int | None = None
     slot_id: int | None = None

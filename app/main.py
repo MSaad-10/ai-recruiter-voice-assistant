@@ -11,7 +11,7 @@ from app.api.webhooks import router as webhook_router
 from app import models
 
 
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="AI Recruiter Voice Assistant",

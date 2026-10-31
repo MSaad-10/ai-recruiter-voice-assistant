@@ -11,6 +11,7 @@ from app.schemas.screening import (
 from app.services.candidate_service import CandidateService
 from app.services.call_service import CallService
 from app.services.screening_service import ScreeningService
+from app.services.authorization_service import AuthorizationService
 from app.eligibility.engine import EligibilityEngine
 
 
@@ -32,6 +33,11 @@ def save_screening_answer(data: SaveScreeningAnswerRequest, db: Session = Depend
     if not call:
         raise HTTPException(status_code = 404, detail = "Voice session not found")
     
+    AuthorizationService.ensure_call_belongs_to_candidate(
+        call=call,
+        candidate=candidate,
+    )
+
     expected_question = ScreeningService.get_next_question(db=db, call_id=data.call_id,)
 
     if expected_question is None:
@@ -68,9 +74,6 @@ def save_screening_answer(data: SaveScreeningAnswerRequest, db: Session = Depend
 @router.post("/check-eligibility", response_model=EligibilityResponse)
 def check_eligibility(data: EligibilityRequest, db: Session = Depends(get_db)):
 
-    print("Eligibility candidate_id:", data.candidate_id)
-    print("Eligibility call_id:", data.call_id)
-
     candidate = CandidateService.get_candidate(db=db, candidate_id=data.candidate_id)
 
     if not candidate:
@@ -80,6 +83,11 @@ def check_eligibility(data: EligibilityRequest, db: Session = Depends(get_db)):
 
     if not call:
         raise HTTPException(status_code=404, detail="Voice session not found")
+
+    AuthorizationService.ensure_call_belongs_to_candidate(
+        call=call,
+        candidate=candidate,
+    )
     
     answers = ScreeningService.get_answers(db=db, call_id=data.call_id)
 
@@ -93,12 +101,6 @@ def check_eligibility(data: EligibilityRequest, db: Session = Depends(get_db)):
                 "missing_questions": sorted(missing_questions),
             },
         )
-
-    print("\n========== ELIGIBILITY DEBUG ==========")
-    print("candidate_id:", data.candidate_id)
-    print("call_id:", data.call_id)
-    print("answers:", answers)
-    print("=======================================\n")
 
     result = EligibilityEngine.evaluate(candidate=candidate, answers=answers)
 

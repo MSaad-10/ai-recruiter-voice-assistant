@@ -12,6 +12,7 @@ from app.schemas.scheduling import (
 from app.services.call_service import CallService
 from app.services.candidate_service import CandidateService
 from app.services.scheduling_service import SchedulingService
+from app.services.authorization_service import AuthorizationService
 
 
 router = APIRouter(
@@ -31,6 +32,11 @@ def get_available_slots(data: AvailableSlotsRequest, db: Session = Depends(get_d
 
     if not call:
         raise HTTPException(status_code=404, detail="Voice session not found")
+
+    AuthorizationService.ensure_call_belongs_to_candidate(
+        call=call,
+        candidate=candidate,
+    )
     
     slots = SchedulingService.get_available_slots(db=db)
 
@@ -59,6 +65,11 @@ def book_interview(data: BookInterviewRequest, db: Session = Depends(get_db)):
     if not call:
         raise HTTPException(status_code=404, detail="Voice session not found")
     
+    AuthorizationService.ensure_call_belongs_to_candidate(
+        call=call,
+        candidate=candidate,
+    )
+
     interview = SchedulingService.book_interview(
         db=db,
         candidate_id=data.candidate_id,
