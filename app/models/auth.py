@@ -91,6 +91,7 @@ class UserSession(Base):
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True,)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now(),)
     user: Mapped["User"] = relationship(back_populates="sessions",)
+    csrf_token_hash: Mapped[str] = mapped_column(String(64), nullable=False,)
 
 
 class PasswordResetToken(Base):
